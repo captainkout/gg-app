@@ -1,4 +1,4 @@
-namespace api.Extensions;
+namespace Api.Extensions;
 
 public static partial class ApiExtensions
 {

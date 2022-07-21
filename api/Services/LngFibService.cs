@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 
-namespace api.Services;
+namespace Api.Services;
 
 public class LngFibService : IFibService<long>
 {

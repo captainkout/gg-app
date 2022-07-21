@@ -1,10 +1,11 @@
+using System.Net;
 using System.Text.Json.Serialization;
-using api.Models;
-using api.Services;
+using Api.Models;
+using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace api.Controllers;
+namespace Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -19,38 +20,50 @@ public class FibController : ControllerBase
         _fibService = fibService;
     }
 
-    [HttpPost]
-    public async Task<FibResponseDto> FibByIndex(FibRequestDto request)
+    /// <summary>
+    /// Base Fib Endpoint before any queue functionality
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPost("FibByIndex")]
+    public async Task<ActionResult<FibResponseDto>> FibByIndex(FibRequestDto request)
     {
-        var task = await Task.FromResult(
+        try
+        {
+            var task = await Task.FromResult(
                 Enumerable
                     .Range(request.StartIndex, request.EndIndex)
                     .AsParallel()
+                    .AsOrdered()
                     .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
                     .Select(n => _fibService.RecursiveFibWithCache(n, request.Cache))
                     .ToList()
             );
-        var result = new FibResponseDto()
+            var result = new FibResponseDto() { Completed = true, Values = task };
+            return result;
+        }
+        catch (Exception e)
         {
-            Values = task
-        };
-        return result;
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+        }
     }
 
-    [HttpPost]
     /// <summary>
     /// Ignore this method, this is only to demostrate an awareness of Newtonsoft api.
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
+    [HttpPost("FibByIndexString")]
     public async Task<string> FibByIndexString(FibRequestDto request)
     {
         var result = new FibResponseDto()
         {
+            Completed = true,
             Values = await Task.FromResult(
                 Enumerable
                     .Range(request.StartIndex, request.EndIndex)
                     .AsParallel()
+                    .AsOrdered()
                     .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
                     .Select(n => _fibService.RecursiveFibWithCache(n, request.Cache))
                     .ToList()

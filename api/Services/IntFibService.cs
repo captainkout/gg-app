@@ -1,10 +1,15 @@
-﻿namespace api.Services;
+﻿using System.ComponentModel;
+
+namespace Api.Services;
 
 public class IntFibService : IFibService<int>
 {
-    public List<int> _cache = new();
+    private AppCacheService _cache;
 
-    public IntFibService() { }
+    public IntFibService(AppCacheService cache)
+    {
+        _cache = cache;
+    }
 
     public int RecursiveFib(int index)
     {
@@ -27,8 +32,8 @@ public class IntFibService : IFibService<int>
             return 0;
         if (index <= 2)
             return 1;
-        if (cache && _cache.Count > index)
-            return _cache[index];
+        if (cache && _cache.Cache[typeof(int)].Count > index)
+            return (int)_cache.Cache[typeof(int)][index];
 
         var sub2 = RecursiveFibWithCache(index - 2, cache);
         var sub1 = RecursiveFibWithCache(index - 1, cache);
@@ -37,7 +42,7 @@ public class IntFibService : IFibService<int>
 
         var val = sub2 + sub1;
         if (cache)
-            _cache.Add(val);
+            _cache.Cache[typeof(int)].Add(val);
         return val;
     }
 }

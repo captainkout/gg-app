@@ -1,6 +1,6 @@
 using System.Numerics;
-using api.Extensions;
-using api.Services;
+using Api.Extensions;
+using Api.Services;
 using Shouldly;
 using Xunit;
 

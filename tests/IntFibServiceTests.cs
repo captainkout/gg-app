@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using api.Extensions;
-using api.Services;
+using Api.Extensions;
+using Api.Services;
 using Microsoft.AspNetCore.Components.Forms;
 using Shouldly;
 using Xunit;
@@ -14,7 +14,14 @@ namespace tests;
 
 public class IntFibServiceTests
 {
-    private IFibService<int> _fibService = new IntFibService();
+    private AppCacheService _cache;
+    private IFibService<int> _fibService;
+
+    public IntFibServiceTests()
+    {
+        _cache = new();
+        _fibService = new IntFibService(_cache);
+    }
 
     [Fact]
     public void RecursiveFib()
@@ -45,7 +52,7 @@ public class IntFibServiceTests
         _fibService.RecursiveFibWithCache(46).ShouldBe(1836311903);
 
         // should be using the cache
-        (_fibService as IntFibService)._cache.Count.ShouldBeGreaterThan(3);
+        _cache.Cache[typeof(int)].Count.ShouldBeGreaterThan(3);
 
         Assert
             .Throws<Exception>(() =>

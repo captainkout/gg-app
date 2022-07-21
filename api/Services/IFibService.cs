@@ -1,4 +1,4 @@
-namespace api.Services;
+namespace Api.Services;
 
 public interface IFibService<T>
 {

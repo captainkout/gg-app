@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace api.Services;
+namespace Api.Services;
 
 public class BigIntFibService : IFibService<BigInteger>
 {

@@ -1,5 +1,5 @@
 using System.Numerics;
-using api.Services;
+using Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
