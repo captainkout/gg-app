@@ -8,7 +8,14 @@ namespace tests;
 
 public class BigIntFibServiceTests
 {
-    private readonly IFibService<BigInteger> _fibService = new BigIntFibService();
+    private AppCacheService _cache;
+    private IFibService<BigInteger> _fibService;
+
+    public BigIntFibServiceTests()
+    {
+        _cache = new();
+        _fibService = new BigIntFibService(_cache);
+    }
 
     [Fact]
     public void RecursiveFib()
@@ -32,6 +39,6 @@ public class BigIntFibServiceTests
         _fibService.RecursiveFibWithCache(47).ShouldBe(2971215073);
 
         // should be using the cache
-        (_fibService as BigIntFibService)._cache.Count.ShouldBeGreaterThan(3);
+        _cache.Cache[typeof(BigInteger)].Count.ShouldBeGreaterThan(0);
     }
 }

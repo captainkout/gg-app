@@ -32,4 +32,15 @@ public class LngFibService : IFibService<long>
             _cache.Add(val);
         return val;
     }
+
+    public List<long> ListFibWithCache(int startIndex, int endIndex, bool cache = true)
+    {
+        return Enumerable
+            .Range(startIndex, endIndex)
+            .AsParallel()
+            .AsOrdered()
+            .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+            .Select(n => RecursiveFibWithCache(n, cache))
+            .ToList();
+    }
 }
