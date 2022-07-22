@@ -1,3 +1,30 @@
+# Solution Struture
+
+Solution contains 3 projects
+
+1. [Api](api\api.csproj)
+
+   - to run webapi, open terminal to ~GG-App/api and enter `dotnet run`
+   - you can view [SwaggerUI](https://localhost:7120/swagger/index.html)
+
+2. [Tests](tests\tests.csproj)
+
+   - to run test, open terminal to ~GG-App/tests and enter `dotnet test`
+   - **Note**: may take up to 3 minutes to complete the tests
+
+3. [Stress](stress\stress.csproj)
+
+   - with the api running, open terminal to ~GG-App/stress and enter `dotnet run`
+   - should print something like this, depending on appsettings.json
+
+   ```bash
+   Stress Test Begin
+   Stress Test End
+   Success/Total 92/100
+   ```
+
+Links are in the markdown beside relevant expectations.
+
 # Prompt
 
 1. Implement a C# Web API using .NET or .NET Core using the requirements listed below.
