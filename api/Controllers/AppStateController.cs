@@ -1,5 +1,6 @@
 using Api.Models;
 using Api.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -9,15 +10,24 @@ namespace Api.Controllers;
 public class AppStateController : ControllerBase
 {
     private readonly ILogger<AppStateController> _logger;
+    private readonly AppStateService _appState;
+    private readonly IMapper _mapper;
 
-    public AppStateController(ILogger<AppStateController> logger)
+    public AppStateController(
+        ILogger<AppStateController> logger,
+        AppStateService appState,
+        IMapper mapper
+    )
     {
         _logger = logger;
+        _appState = appState;
+        _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<AppStateDto> Get()
     {
-        return await Task.FromResult(new AppStateDto());
+        var dto = _mapper.Map<AppState, AppStateDto>(_appState.State);
+        return await Task.FromResult(dto);
     }
 }

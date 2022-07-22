@@ -4,7 +4,7 @@ namespace Api.Services;
 
 public class AppCacheService
 {
-    public DateTime Start;
+    public DateTime Birth;
     public Dictionary<Type, List<object>> Cache = new();
 
     public AppCacheService()
@@ -20,6 +20,6 @@ public class AppCacheService
             { typeof(long), new List<object>() },
             { typeof(BigInteger), new List<object>() }
         };
-        Start = DateTime.Now;
+        Birth = DateTime.Now;
     }
 }

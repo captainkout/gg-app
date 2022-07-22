@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json.Serialization;
+using System.Threading;
 using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,17 @@ public class IntFibController : ControllerBase
     private readonly ILogger<IntFibController> _logger;
     private readonly IFibService<int> _fibService;
 
-    public IntFibController(ILogger<IntFibController> logger, IFibService<int> fibService)
+    private readonly AppStateService _appState;
+
+    public IntFibController(
+        ILogger<IntFibController> logger,
+        IFibService<int> fibService,
+        AppStateService appState
+    )
     {
         _logger = logger;
         _fibService = fibService;
+        _appState = appState;
     }
 
     /// <summary>
@@ -28,41 +36,34 @@ public class IntFibController : ControllerBase
     [HttpPost("FibByIndex")]
     public async Task<ActionResult<FibResponseDto<int>>> FibByIndex(FibRequestDto request)
     {
+        var tokenSource = new CancellationTokenSource();
+        tokenSource.CancelAfter(request.MaxTime);
+        _appState.Queue.TryAdd(tokenSource, true);
         try
         {
-            var task = await Task.FromResult(
-                _fibService.ListFibWithCache(request.StartIndex, request.EndIndex, request.Cache)
+            var task = await Task.Run(
+                () =>
+                    _fibService.ListFibWithCache(
+                        request.StartIndex,
+                        request.EndIndex,
+                        request.Cache,
+                        tokenSource.Token
+                    ),
+                tokenSource.Token
             );
             var result = new FibResponseDto<int>() { Completed = true, Values = task };
             return result;
         }
         catch (Exception e)
         {
+            _logger.LogInformation("Failure");
             return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
-    }
-
-    /// <summary>
-    /// Ignore this method, this is only to demostrate an awareness of Newtonsoft api.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost("FibByIndexString")]
-    public async Task<string> FibByIndexString(FibRequestDto request)
-    {
-        var result = new FibResponseDto<int>()
+        finally
         {
-            Completed = true,
-            Values = await Task.FromResult(
-                Enumerable
-                    .Range(request.StartIndex, request.EndIndex)
-                    .AsParallel()
-                    .AsOrdered()
-                    .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                    .Select(n => _fibService.RecursiveFibWithCache(n, request.Cache))
-                    .ToList()
-            )
-        };
-        return JsonConvert.SerializeObject(result);
+            _appState.Queue.TryRemove(
+                new KeyValuePair<CancellationTokenSource, bool>(tokenSource, true)
+            );
+        }
     }
 }

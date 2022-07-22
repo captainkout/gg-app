@@ -46,14 +46,41 @@ public class IntFibService : IFibService<int>
         return val;
     }
 
-    public List<int> ListFibWithCache(int startIndex, int endIndex, bool cache = true)
+    public int CancelableFib(int index, bool cache, CancellationToken token)
+    {
+        if (token.IsCancellationRequested)
+            throw new TaskCanceledException();
+        if (index == 0)
+            return 0;
+        if (index <= 2)
+            return 1;
+        if (cache && _cache.Cache[typeof(int)].Count > index)
+            return (int)_cache.Cache[typeof(int)][index];
+
+        var sub2 = CancelableFib(index - 2, cache, token);
+        var sub1 = CancelableFib(index - 1, cache, token);
+        if (sub2 + sub1 < 0)
+            throw new Exception("Error occured. Likely overflow.");
+
+        var val = sub2 + sub1;
+        if (cache)
+            _cache.Cache[typeof(int)].Add(val);
+        return val;
+    }
+
+    public List<int> ListFibWithCache(
+        int startIndex,
+        int endIndex,
+        bool cache,
+        CancellationToken token
+    )
     {
         return Enumerable
             .Range(startIndex, endIndex)
             .AsParallel()
             .AsOrdered()
             .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-            .Select(n => RecursiveFibWithCache(n, cache))
+            .Select(n => CancelableFib(n, cache, token))
             .ToList();
     }
 }

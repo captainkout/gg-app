@@ -8,7 +8,14 @@ namespace tests;
 
 public class LngFibServiceTests
 {
-    private readonly IFibService<long> _fibService = new LngFibService();
+    private AppCacheService _cache;
+    private IFibService<long> _fibService;
+
+    public LngFibServiceTests()
+    {
+        _cache = new();
+        _fibService = new LngFibService(_cache);
+    }
 
     [Fact]
     public void RecursiveFib()
@@ -18,7 +25,6 @@ public class LngFibServiceTests
         _fibService.RecursiveFib(2).ShouldBe(1);
         _fibService.RecursiveFib(3).ShouldBe(2);
         _fibService.RecursiveFib(20).ShouldBe(6765);
-        _fibService.RecursiveFib(46).ShouldBe(1836311903);
 
         // long so we can do 47
         _fibService.RecursiveFib(47).ShouldBe(2971215073);
@@ -36,6 +42,6 @@ public class LngFibServiceTests
         _fibService.RecursiveFibWithCache(47).ShouldBe(2971215073);
 
         // should be using the cache
-        (_fibService as LngFibService)._cache.Count.ShouldBeGreaterThan(3);
+        _cache.Cache[typeof(long)].Count.ShouldBeGreaterThan(0);
     }
 }
